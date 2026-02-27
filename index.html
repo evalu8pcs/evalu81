@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evalu8 Tender Pro</title>
+<style>
+body { font-family: -apple-system; margin: 20px; background: #f2f2f7; }
+.card { background: white; padding: 20px; border-radius: 16px; margin-bottom: 14px; }
+input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ccc; font-size: 18px; }
+label { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 18px; }
+.value { font-weight: 600; }
+h2 { margin-top: 0; }
+
+.mode-switch {
+  display: flex;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #ccc;
+}
+.mode-switch button {
+  flex: 1;
+  padding: 10px;
+  font-size: 16px;
+  border: none;
+  background: #eee;
+}
+.mode-switch button.active {
+  background: black;
+  color: white;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>Evalu8 Tender Pro</h2>
+
+<div class="mode-switch">
+  <button id="modeMargin" class="active">Margin Mode</button>
+  <button id="modeProfit">Profit Target</button>
+</div>
+
+Cost:
+<input id="c" type="number" inputmode="decimal">
+
+<div id="marginBlock">
+  Margin %:
+  <input id="m" value="7.5" type="number" inputmode="decimal">
+</div>
+
+<div id="profitBlock" style="display:none;">
+  Profit Target (£):
+  <input id="pt" value="0" type="number" inputmode="decimal">
+</div>
+
+<label>
+<input type="checkbox" id="vat"> Add VAT (20%)
+</label>
+</div>
+
+<div class="card">
+Sell: <span id="s" class="value">£0.00</span><br>
+Profit: <span id="p" class="value">£0.00</span><br>
+Margin: <span id="mg" class="value">0.00%</span><br>
+Markup: <span id="mu" class="value">0.00%</span>
+</div>
+
+<script>
+let mode = "margin";
+
+document.getElementById("modeMargin").onclick = () => {
+  mode = "margin";
+  document.getElementById("modeMargin").classList.add("active");
+  document.getElementById("modeProfit").classList.remove("active");
+  document.getElementById("marginBlock").style.display = "block";
+  document.getElementById("profitBlock").style.display = "none";
+  calc();
+};
+
+document.getElementById("modeProfit").onclick = () => {
+  mode = "profit";
+  document.getElementById("modeProfit").classList.add("active");
+  document.getElementById("modeMargin").classList.remove("active");
+  document.getElementById("marginBlock").style.display = "none";
+  document.getElementById("profitBlock").style.display = "block";
+  calc();
+};
+
+function calc() {
+  let cost = parseFloat(document.getElementById("c").value) || 0;
+  let sell = 0;
+  let profit = 0;
+  let margin = 0;
+  let markup = 0;
+
+  if (mode === "margin") {
+    let m = parseFloat(document.getElementById("m").value) / 100 || 0;
+    sell = cost / (1 - m);
+    profit = sell - cost;
+    margin = m * 100;
+    markup = (profit / cost) * 100;
+  }
+
+  if (mode === "profit") {
+    profit = parseFloat(document.getElementById("pt").value) || 0;
+    sell = cost + profit;
+    margin = (profit / sell) * 100;
+    markup = (profit / cost) * 100;
+  }
+
+  if (document.getElementById("vat").checked) sell *= 1.2;
+
+  document.getElementById("s").innerText = "£" + sell.toFixed(2);
+  document.getElementById("p").innerText = "£" + profit.toFixed(2);
+  document.getElementById("mg").innerText = margin.toFixed(2) + "%";
+  document.getElementById("mu").innerText = markup.toFixed(2) + "%";
+}
+
+document.querySelectorAll("input").forEach(el => el.addEventListener("input", calc));
+</script>
+
+</body>
+</html>
